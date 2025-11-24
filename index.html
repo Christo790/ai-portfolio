@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mark Gatere | AI Terminal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --accent-green: #238636;
+            --accent-blue: #2f81f7;
+            --border-color: #30363d;
+            --font-stack: 'Fira Code', monospace;
+            --cursor-color: #8b949e;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: var(--font-stack);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* --- Header --- */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 25px;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(13, 17, 23, 0.85);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand-container { display: flex; flex-direction: column; }
+        .brand-name { font-weight: 600; font-size: 1.1rem; letter-spacing: -0.5px; }
+        .brand-role { font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px; }
+        .header-right { display: flex; gap: 20px; font-size: 0.9rem; color: var(--text-secondary); }
+
+        /* --- Navigation --- */
+        .nav-commands {
+            padding: 12px 25px;
+            background: rgba(13, 17, 23, 0.95);
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.85rem;
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        .nav-item { color: var(--text-secondary); cursor: pointer; transition: color 0.2s; }
+        .nav-item:hover { color: var(--accent-blue); text-decoration: underline; }
+        .separator { color: var(--border-color); }
+
+        /* --- Terminal Container --- */
+        #terminal-container {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+            cursor: text;
+        }
+
+        .output-line { margin-bottom: 8px; line-height: 1.6; white-space: pre-wrap; }
+        .cmd-keyword { color: var(--accent-blue); font-weight: bold; }
+        .cmd-error { color: #f85149; }
+        .cmd-success { color: #3fb950; }
+        
+        /* --- Input Area & Cursor --- */
+        .input-line {
+            display: flex;
+            align-items: center;
+            margin-top: 15px;
+            position: relative;
+        }
+
+        .prompt {
+            color: #3fb950;
+            margin-right: 10px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        #cmd-display {
+            color: var(--text-primary);
+            font-family: var(--font-stack);
+            font-size: 1rem;
+            white-space: pre;
+            min-height: 24px;
+        }
+
+        /* Block Cursor Animation */
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 1.1em;
+            background-color: var(--cursor-color);
+            vertical-align: text-bottom;
+            margin-left: 1px;
+            animation: blink 1s step-end infinite;
+        }
+
+        body.not-focused .cursor {
+            animation: none;
+            background-color: transparent;
+            border: 1px solid var(--cursor-color);
+        }
+
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        /* Hidden Input */
+        #cmd-input {
+            position: absolute;
+            opacity: 0;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: default;
+        }
+
+        .intro-banner { color: var(--accent-blue); margin-bottom: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="brand-container">
+            <span class="brand-name">Mark Gatere</span>
+            <span class="brand-role">Software Engineer</span>
+        </div>
+        <div class="header-right">
+            <span id="date-display"></span>
+            <span id="clock-display"></span>
+        </div>
+    </header>
+
+    <div class="nav-commands">
+        <span class="nav-item" onclick="runCmd('help')">help</span> <span class="separator">|</span>
+        <span class="nav-item" onclick="runCmd('about')">about</span> <span class="separator">|</span>
+        <span class="nav-item" onclick="runCmd('projects')">projects</span> <span class="separator">|</span>
+        <span class="nav-item" onclick="runCmd('skills')">skills</span> <span class="separator">|</span>
+        <span class="nav-item" onclick="runCmd('login')">login</span> <span class="separator">|</span>
+        <span class="nav-item" onclick="runCmd('clear')">clear</span>
+    </div>
+
+    <div id="terminal-container" onclick="focusInput()">
+        <div class="intro-banner">
+            <pre>
+  __  __            _      _____       _                
+ |  \/  |          | |    / ____|     | |               
+ | \  / | __ _ _ __| | __| |  __  __ _| |_ ___ _ __ ___ 
+ | |\/| |/ _` | '__| |/ /| | |_ |/ _` | __/ _ \ '__/ _ \
+ | |  | | (_| | |  |   < | |__| | (_| | ||  __/ | |  __/
+ |_|  |_|\__,_|_|  |_|\_\ \_____|\__,_|\__\___|_|  \___|
+            </pre>
+        </div>
+        
+        <div id="history"></div>
+        
+        <div class="input-line">
+            <span class="prompt">gatere@portfolio:~$</span>
+            <span id="cmd-display"></span><span class="cursor"></span>
+            <input type="text" id="cmd-input" autocomplete="off" spellcheck="false" autofocus>
+        </div>
+    </div>
+
+    <script>
+        const input = document.getElementById('cmd-input');
+        const display = document.getElementById('cmd-display');
+        const historyDiv = document.getElementById('history');
+        const container = document.getElementById('terminal-container');
+        const dateDisplay = document.getElementById('date-display');
+        const clockDisplay = document.getElementById('clock-display');
+
+        let cmdHistory = [];
+        let historyIndex = -1;
+
+        // --- KEY MANAGEMENT (GOOGLE GEMINI) ---
+        function getApiKey() { return localStorage.getItem('gemini_key'); }
+        function setApiKey(key) { localStorage.setItem('gemini_key', key); }
+        function removeApiKey() { localStorage.removeItem('gemini_key'); }
+
+        const files = {
+            "about": "Hi, I'm Mark Gatere. I'm a Software Engineer passionate about building scalable web applications and AI solutions.",
+            "skills": "• Languages: Python, JavaScript, TypeScript, Dart\n• Frameworks: React, Next.js, Flutter, Node.js\n• Tools: Docker, Git, AWS, Firebase",
+            "projects": "1. <span class='cmd-keyword'>AI Chatbot</span> - A wrapper built with Next.js\n2. <span class='cmd-keyword'>E-Commerce App</span> - Full stack Flutter application\n3. <span class='cmd-keyword'>Portfolio V1</span> - My previous 3D website",
+            "experience": "<span class='cmd-keyword'>2023 - Present</span>: Senior Engineer @ TechCorp\n<span class='cmd-keyword'>2021 - 2023</span>: Full Stack Dev @ StartupXYZ",
+            "contact": "Email: mark@example.com\nGitHub: github.com/gatere\nTwitter: @markgatere",
+            "help": "Available commands: help, about, projects, skills, experience, contact, clear, login, logout"
+        };
+
+        // Time Update
+        function updateTime() {
+            const now = new Date();
+            dateDisplay.innerText = now.toLocaleDateString();
+            clockDisplay.innerText = now.toLocaleTimeString();
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // Typewriter Effect
+        function typeWriter(text, element, speed = 10) {
+            let i = 0;
+            function type() {
+                if (i < text.length) {
+                    element.innerHTML += text.charAt(i);
+                    i++;
+                    container.scrollTop = container.scrollHeight;
+                    setTimeout(type, speed);
+                }
+            }
+            type();
+        }
+
+        // Initial Message
+        setTimeout(() => {
+            const welcomeLine = document.createElement('div');
+            welcomeLine.className = 'output-line';
+            historyDiv.appendChild(welcomeLine);
+            const msg = "Welcome. Type 'login <key>' to enable AI Mode (Free via Google Gemini), or 'help' for standard commands.";
+            typeWriter(msg, welcomeLine, 15);
+        }, 500);
+
+        // Focus & Input Handling
+        function focusInput() { input.focus(); }
+        document.addEventListener('click', (e) => { 
+            if (window.getSelection().toString() === '') input.focus(); 
+        });
+        input.addEventListener('focus', () => document.body.classList.remove('not-focused'));
+        input.addEventListener('blur', () => document.body.classList.add('not-focused'));
+        
+        input.addEventListener('input', function() { display.innerText = this.value; });
+
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const cmd = this.value.trim();
+                if (cmd) {
+                    cmdHistory.push(cmd);
+                    historyIndex = cmdHistory.length;
+                    processCommand(cmd);
+                }
+                this.value = '';
+                display.innerText = '';
+            } else if (e.key === 'ArrowUp') {
+                if (historyIndex > 0) {
+                    historyIndex--;
+                    this.value = cmdHistory[historyIndex];
+                    display.innerText = this.value;
+                }
+                e.preventDefault();
+            } else if (e.key === 'ArrowDown') {
+                if (historyIndex < cmdHistory.length - 1) {
+                    historyIndex++;
+                    this.value = cmdHistory[historyIndex];
+                    display.innerText = this.value;
+                } else {
+                    historyIndex = cmdHistory.length;
+                    this.value = '';
+                    display.innerText = '';
+                }
+                e.preventDefault();
+            }
+        });
+
+        // Command Processing
+        async function processCommand(cmd) {
+            const parts = cmd.split(' ');
+            const lowerCmd = parts[0].toLowerCase();
+
+            // Echo Input
+            const cmdLine = document.createElement('div');
+            cmdLine.className = 'output-line';
+            cmdLine.innerHTML = `<span class="prompt">gatere@portfolio:~$</span> ${cmd}`;
+            historyDiv.appendChild(cmdLine);
+
+            const output = document.createElement('div');
+            output.className = 'output-line';
+            historyDiv.appendChild(output);
+
+            // 1. Standard Commands
+            if (lowerCmd === 'clear') {
+                historyDiv.innerHTML = '';
+            } 
+            else if (files[lowerCmd]) {
+                output.innerHTML = files[lowerCmd];
+            } 
+            // 2. Login Logic
+            else if (lowerCmd === 'login') {
+                if (parts.length > 1) {
+                    setApiKey(parts[1]);
+                    output.className += ' cmd-success';
+                    output.innerText = "Google Gemini Key saved! AI Mode enabled.";
+                } else {
+                    output.className += ' cmd-error';
+                    output.innerText = "Usage: login <your-google-api-key>";
+                }
+            }
+            else if (lowerCmd === 'logout') {
+                removeApiKey();
+                output.innerText = "Key removed. AI Mode disabled.";
+            }
+            // 3. AI Fallback
+            else {
+                const apiKey = getApiKey();
+                if (apiKey) {
+                    output.innerText = "Thinking...";
+                    try {
+                        const aiResponse = await fetchGeminiResponse(cmd, apiKey);
+                        output.innerText = ""; 
+                        typeWriter(aiResponse, output, 5);
+                    } catch (error) {
+                        output.className += ' cmd-error';
+                        output.innerText = "AI Error: " + error.message;
+                    }
+                } else {
+                    output.className += ' cmd-error';
+                    output.innerText = `Command not found: ${lowerCmd}. Type 'help' or 'login <key>'.`;
+                }
+            }
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Wrapper to run commands from nav clicks
+        function runCmd(cmd) {
+            input.value = cmd;
+            display.innerText = cmd;
+            setTimeout(() => {
+                processCommand(cmd);
+                input.value = '';
+                display.innerText = '';
+                input.focus();
+            }, 100);
+        }
+
+        // --- GOOGLE GEMINI API FUNCTION ---
+        async function fetchGeminiResponse(userPrompt, apiKey) {
+            const systemContext = `You are Mark Gatere's interactive terminal portfolio assistant. 
+            You are helpful, concise, and tech-savvy. 
+            Answer questions about Mark based on these facts: 
+            - Software Engineer, AI enthusiast.
+            - Stacks: React, Node, Flutter, Python.
+            - Works at TechCorp.
+            - Loves Matrix movies and terminal interfaces.
+            If the user asks a general question, answer it normally. Keep answers short like a terminal output.`;
+
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [{
+                            text: systemContext + "\n\nUser Question: " + userPrompt
+                        }]
+                    }]
+                })
+            });
+
+            const data = await response.json();
+            if (data.error) throw new Error(data.error.message);
+            return data.candidates[0].content.parts[0].text;
+        }
+    </script>
+</body>
+</html>
