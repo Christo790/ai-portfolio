@@ -166,7 +166,6 @@
         <span class="nav-item" onclick="runCmd('about')">about</span> <span class="separator">|</span>
         <span class="nav-item" onclick="runCmd('projects')">projects</span> <span class="separator">|</span>
         <span class="nav-item" onclick="runCmd('interests')">interests</span> <span class="separator">|</span>
-        <span class="nav-item" onclick="runCmd('login')">login</span> <span class="separator">|</span>
         <span class="nav-item" onclick="runCmd('clear')">clear</span>
     </div>
 
@@ -198,9 +197,8 @@
         const container = document.getElementById('terminal-container');
         const clockDisplay = document.getElementById('clock-display');
 
-        function getApiKey() { return localStorage.getItem('gemini_key'); }
-        function setApiKey(key) { localStorage.setItem('gemini_key', key); }
-        function removeApiKey() { localStorage.removeItem('gemini_key'); }
+        // --- 🔑 API KEY CONFIGURATION ---
+        const GEMINI_API_KEY = "AIzaSyAo7qoBFpVnrpaau7fJU-eSVErWToVBB3o"; 
 
         const files = {
             "about": "Hi! I'm <span class='cmd-keyword'>Christo</span>, a Flutter Developer and Designer based in Kerala.\nI love building mobile apps, creating custom logos, and watching the latest Malayalam OTT releases.",
@@ -208,7 +206,7 @@
             "projects": "1. <span class='cmd-keyword'>Music Streaming App</span> - Built with Flutter & Music APIs\n2. <span class='cmd-keyword'>Logo Designs</span> - Custom branding projects\n3. <span class='cmd-keyword'>Personal Site</span> - Hosted on Cloudflare Pages",
             "interests": "• <span class='cmd-keyword'>Movies:</span> Malayalam Cinema (OTT)\n• <span class='cmd-keyword'>Games:</span> Mini Militia, BombSquad, Genshin Impact\n• <span class='cmd-keyword'>Sports:</span> Formula 1 Racing\n• <span class='cmd-keyword'>Anime:</span> High School DxD, Classroom of the Elite",
             "contact": "Email: christo@example.com\nGitHub: github.com/christo",
-            "help": "Commands: help, about, projects, skills, interests, login, clear"
+            "help": "Commands: help, about, projects, skills, interests, clear"
         };
 
         function updateTime() {
@@ -235,7 +233,7 @@
             const welcomeLine = document.createElement('div');
             welcomeLine.className = 'output-line';
             historyDiv.appendChild(welcomeLine);
-            const msg = "Welcome Christo! Type 'login' to enable AI, or 'projects' to see your Flutter work.";
+            const msg = "Welcome Christo! System is online. Ask me anything or type 'help'.";
             typeWriter(msg, welcomeLine, 20);
         }, 500);
 
@@ -274,32 +272,16 @@
 
             if (lowerCmd === 'clear') { historyDiv.innerHTML = ''; } 
             else if (files[lowerCmd]) { output.innerHTML = files[lowerCmd]; } 
-            else if (lowerCmd === 'login') {
-                if (parts.length > 1) {
-                    setApiKey(parts[1]);
-                    output.className += ' cmd-success';
-                    output.innerText = "Key saved! AI Enabled.";
-                } else {
-                    output.className += ' cmd-error';
-                    output.innerText = "Usage: login <key>";
-                }
-            }
-            else if (lowerCmd === 'logout') { removeApiKey(); output.innerText = "Key removed."; }
             else {
-                const apiKey = getApiKey();
-                if (apiKey) {
-                    output.innerText = "Thinking...";
-                    try {
-                        const aiResponse = await fetchGeminiResponse(cmd, apiKey);
-                        output.innerText = ""; 
-                        typeWriter(aiResponse, output, 5);
-                    } catch (error) {
-                        output.className += ' cmd-error';
-                        output.innerText = "Error: " + error.message;
-                    }
-                } else {
+                // Default to AI for any unknown command
+                output.innerText = "Thinking...";
+                try {
+                    const aiResponse = await fetchGeminiResponse(cmd);
+                    output.innerText = ""; 
+                    typeWriter(aiResponse, output, 5);
+                } catch (error) {
                     output.className += ' cmd-error';
-                    output.innerText = `Unknown: ${lowerCmd}. Try 'help'.`;
+                    output.innerText = "Error: " + error.message;
                 }
             }
             scrollToBottom();
@@ -310,7 +292,7 @@
             setTimeout(() => { processCommand(cmd); input.value = ''; display.innerText = ''; }, 100);
         }
 
-        async function fetchGeminiResponse(userPrompt, apiKey) {
+        async function fetchGeminiResponse(userPrompt) {
             const systemContext = `You are the AI assistant for Christo's portfolio.
             Christo is a Flutter Developer and Designer from Kerala, India.
             
@@ -323,7 +305,7 @@
             Keep answers short (max 2 sentences). Be cool and tech-savvy.`;
 
             const modelName = "gemini-2.5-flash"; 
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${GEMINI_API_KEY}`;
 
             const response = await fetch(url, {
                 method: 'POST',
