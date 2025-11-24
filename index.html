@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mark Gatere | AI Terminal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content, maximum-scale=1.0, user-scalable=no">
+    <title>Christo | Flutter Dev</title>
+    
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -19,109 +20,111 @@
             --cursor-color: #8b949e;
         }
 
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
             background-color: var(--bg-color);
             color: var(--text-primary);
             font-family: var(--font-stack);
             margin: 0;
-            height: 100vh;
+            height: 100dvh; 
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
 
-        /* --- Header --- */
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px 25px;
+            padding: 12px 20px;
             border-bottom: 1px solid var(--border-color);
-            background: rgba(13, 17, 23, 0.85);
-            backdrop-filter: blur(10px);
-            position: sticky;
-            top: 0;
+            background: rgba(13, 17, 23, 0.95);
             z-index: 100;
+            flex-shrink: 0;
         }
 
         .brand-container { display: flex; flex-direction: column; }
-        .brand-name { font-weight: 600; font-size: 1.1rem; letter-spacing: -0.5px; }
-        .brand-role { font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px; }
-        .header-right { display: flex; gap: 20px; font-size: 0.9rem; color: var(--text-secondary); }
+        .brand-name { font-weight: 600; font-size: 1rem; letter-spacing: -0.5px; }
+        .brand-role { font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px; }
+        
+        .header-right { 
+            display: flex; gap: 15px; font-size: 0.8rem; color: var(--text-secondary); 
+        }
 
-        /* --- Navigation --- */
         .nav-commands {
-            padding: 12px 25px;
-            background: rgba(13, 17, 23, 0.95);
+            padding: 10px 15px;
+            background: rgba(13, 17, 23, 0.98);
             border-bottom: 1px solid var(--border-color);
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             display: flex;
             gap: 15px;
-            overflow-x: auto;
+            overflow-x: auto; 
             white-space: nowrap;
+            flex-shrink: 0;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
-        .nav-item { color: var(--text-secondary); cursor: pointer; transition: color 0.2s; }
-        .nav-item:hover { color: var(--accent-blue); text-decoration: underline; }
-        .separator { color: var(--border-color); }
+        .nav-commands::-webkit-scrollbar { display: none; }
 
-        /* --- Terminal Container --- */
+        .nav-item { 
+            color: var(--text-secondary); 
+            cursor: pointer; 
+            padding: 5px 5px; 
+            border-radius: 4px;
+        }
+        .nav-item:active { color: var(--accent-blue); background: rgba(47, 129, 247, 0.1); }
+        .separator { color: var(--border-color); opacity: 0.5; }
+
         #terminal-container {
             flex: 1;
-            padding: 25px;
+            padding: 15px 20px;
             overflow-y: auto;
             cursor: text;
+            scroll-behavior: smooth;
         }
 
-        .output-line { margin-bottom: 8px; line-height: 1.6; white-space: pre-wrap; }
+        .output-line { margin-bottom: 10px; line-height: 1.5; white-space: pre-wrap; font-size: 0.95rem; }
         .cmd-keyword { color: var(--accent-blue); font-weight: bold; }
         .cmd-error { color: #f85149; }
         .cmd-success { color: #3fb950; }
         
-        /* --- Input Area & Cursor --- */
         .input-line {
             display: flex;
             align-items: center;
-            margin-top: 15px;
+            margin-top: 10px;
             position: relative;
+            min-height: 40px;
         }
 
         .prompt {
             color: #3fb950;
-            margin-right: 10px;
+            margin-right: 8px;
             font-weight: 600;
             white-space: nowrap;
+            font-size: 0.95rem;
         }
 
         #cmd-display {
             color: var(--text-primary);
             font-family: var(--font-stack);
-            font-size: 1rem;
+            font-size: 16px; 
             white-space: pre;
             min-height: 24px;
+            word-break: break-all;
         }
 
-        /* Block Cursor Animation */
         .cursor {
             display: inline-block;
             width: 10px;
-            height: 1.1em;
+            height: 1.2em;
             background-color: var(--cursor-color);
-            vertical-align: text-bottom;
+            vertical-align: middle;
             margin-left: 1px;
             animation: blink 1s step-end infinite;
         }
-
-        body.not-focused .cursor {
-            animation: none;
-            background-color: transparent;
-            border: 1px solid var(--cursor-color);
-        }
-
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
-        /* Hidden Input */
         #cmd-input {
             position: absolute;
             opacity: 0;
@@ -129,21 +132,31 @@
             left: 0;
             width: 100%;
             height: 100%;
-            cursor: default;
+            font-size: 16px; 
         }
 
-        .intro-banner { color: var(--accent-blue); margin-bottom: 20px; font-weight: bold; }
+        .intro-banner { 
+            color: var(--accent-blue); 
+            margin-bottom: 20px; 
+            font-weight: bold; 
+            font-size: 0.7rem; 
+            line-height: 1.2;
+        }
+
+        @media (max-width: 600px) {
+            .header-right { display: none; } 
+            .intro-banner { font-size: 0.6rem; }
+        }
     </style>
 </head>
 <body>
 
     <header>
         <div class="brand-container">
-            <span class="brand-name">Mark Gatere</span>
-            <span class="brand-role">Software Engineer</span>
+            <span class="brand-name">Christo</span>
+            <span class="brand-role">Flutter Developer & Designer</span>
         </div>
         <div class="header-right">
-            <span id="date-display"></span>
             <span id="clock-display"></span>
         </div>
     </header>
@@ -152,7 +165,7 @@
         <span class="nav-item" onclick="runCmd('help')">help</span> <span class="separator">|</span>
         <span class="nav-item" onclick="runCmd('about')">about</span> <span class="separator">|</span>
         <span class="nav-item" onclick="runCmd('projects')">projects</span> <span class="separator">|</span>
-        <span class="nav-item" onclick="runCmd('skills')">skills</span> <span class="separator">|</span>
+        <span class="nav-item" onclick="runCmd('interests')">interests</span> <span class="separator">|</span>
         <span class="nav-item" onclick="runCmd('login')">login</span> <span class="separator">|</span>
         <span class="nav-item" onclick="runCmd('clear')">clear</span>
     </div>
@@ -160,21 +173,21 @@
     <div id="terminal-container" onclick="focusInput()">
         <div class="intro-banner">
             <pre>
-  __  __            _      _____       _                
- |  \/  |          | |    / ____|     | |               
- | \  / | __ _ _ __| | __| |  __  __ _| |_ ___ _ __ ___ 
- | |\/| |/ _` | '__| |/ /| | |_ |/ _` | __/ _ \ '__/ _ \
- | |  | | (_| | |  |   < | |__| | (_| | ||  __/ | |  __/
- |_|  |_|\__,_|_|  |_|\_\ \_____|\__,_|\__\___|_|  \___|
+   _____ _          _     _        
+  / ____| |        (_)   | |       
+ | |    | |__  _ __ _ ___| |_ ___  
+ | |    | '_ \| '__| / __| __/ _ \ 
+ | |____| | | | |  | \__ \ || (_) |
+  \_____|_| |_|_|  |_|___/\__\___/ 
             </pre>
         </div>
         
         <div id="history"></div>
         
         <div class="input-line">
-            <span class="prompt">gatere@portfolio:~$</span>
+            <span class="prompt">christo@kerala:~$</span>
             <span id="cmd-display"></span><span class="cursor"></span>
-            <input type="text" id="cmd-input" autocomplete="off" spellcheck="false" autofocus>
+            <input type="text" id="cmd-input" autocomplete="off" spellcheck="false">
         </div>
     </div>
 
@@ -183,137 +196,95 @@
         const display = document.getElementById('cmd-display');
         const historyDiv = document.getElementById('history');
         const container = document.getElementById('terminal-container');
-        const dateDisplay = document.getElementById('date-display');
         const clockDisplay = document.getElementById('clock-display');
 
-        let cmdHistory = [];
-        let historyIndex = -1;
-
-        // --- KEY MANAGEMENT (GOOGLE GEMINI) ---
         function getApiKey() { return localStorage.getItem('gemini_key'); }
         function setApiKey(key) { localStorage.setItem('gemini_key', key); }
         function removeApiKey() { localStorage.removeItem('gemini_key'); }
 
         const files = {
-            "about": "Hi, I'm Mark Gatere. I'm a Software Engineer passionate about building scalable web applications and AI solutions.",
-            "skills": "• Languages: Python, JavaScript, TypeScript, Dart\n• Frameworks: React, Next.js, Flutter, Node.js\n• Tools: Docker, Git, AWS, Firebase",
-            "projects": "1. <span class='cmd-keyword'>AI Chatbot</span> - A wrapper built with Next.js\n2. <span class='cmd-keyword'>E-Commerce App</span> - Full stack Flutter application\n3. <span class='cmd-keyword'>Portfolio V1</span> - My previous 3D website",
-            "experience": "<span class='cmd-keyword'>2023 - Present</span>: Senior Engineer @ TechCorp\n<span class='cmd-keyword'>2021 - 2023</span>: Full Stack Dev @ StartupXYZ",
-            "contact": "Email: mark@example.com\nGitHub: github.com/gatere\nTwitter: @markgatere",
-            "help": "Available commands: help, about, projects, skills, experience, contact, clear, login, logout"
+            "about": "Hi! I'm <span class='cmd-keyword'>Christo</span>, a Flutter Developer and Designer based in Kerala.\nI love building mobile apps, creating custom logos, and watching the latest Malayalam OTT releases.",
+            "skills": "• <span class='cmd-keyword'>Tech:</span> Flutter, Dart, GitHub Pages, Cloudflare\n• <span class='cmd-keyword'>Design:</span> Logo Creation, UI/UX\n• <span class='cmd-keyword'>Languages:</span> Malayalam, English",
+            "projects": "1. <span class='cmd-keyword'>Music Streaming App</span> - Built with Flutter & Music APIs\n2. <span class='cmd-keyword'>Logo Designs</span> - Custom branding projects\n3. <span class='cmd-keyword'>Personal Site</span> - Hosted on Cloudflare Pages",
+            "interests": "• <span class='cmd-keyword'>Movies:</span> Malayalam Cinema (OTT)\n• <span class='cmd-keyword'>Games:</span> Mini Militia, BombSquad, Genshin Impact\n• <span class='cmd-keyword'>Sports:</span> Formula 1 Racing\n• <span class='cmd-keyword'>Anime:</span> High School DxD, Classroom of the Elite",
+            "contact": "Email: christo@example.com\nGitHub: github.com/christo",
+            "help": "Commands: help, about, projects, skills, interests, login, clear"
         };
 
-        // Time Update
         function updateTime() {
             const now = new Date();
-            dateDisplay.innerText = now.toLocaleDateString();
-            clockDisplay.innerText = now.toLocaleTimeString();
+            clockDisplay.innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
         }
         setInterval(updateTime, 1000);
         updateTime();
 
-        // Typewriter Effect
         function typeWriter(text, element, speed = 10) {
             let i = 0;
             function type() {
                 if (i < text.length) {
                     element.innerHTML += text.charAt(i);
                     i++;
-                    container.scrollTop = container.scrollHeight;
+                    scrollToBottom();
                     setTimeout(type, speed);
                 }
             }
             type();
         }
 
-        // Initial Message
         setTimeout(() => {
             const welcomeLine = document.createElement('div');
             welcomeLine.className = 'output-line';
             historyDiv.appendChild(welcomeLine);
-            const msg = "Welcome. Type 'login <key>' to enable AI Mode (Free via Google Gemini), or 'help' for standard commands.";
-            typeWriter(msg, welcomeLine, 15);
+            const msg = "Welcome Christo! Type 'login' to enable AI, or 'projects' to see your Flutter work.";
+            typeWriter(msg, welcomeLine, 20);
         }, 500);
 
-        // Focus & Input Handling
-        function focusInput() { input.focus(); }
-        document.addEventListener('click', (e) => { 
-            if (window.getSelection().toString() === '') input.focus(); 
-        });
-        input.addEventListener('focus', () => document.body.classList.remove('not-focused'));
-        input.addEventListener('blur', () => document.body.classList.add('not-focused'));
+        function focusInput() { 
+            input.focus(); 
+            scrollToBottom();
+        }
         
-        input.addEventListener('input', function() { display.innerText = this.value; });
+        function scrollToBottom() {
+            container.scrollTop = container.scrollHeight;
+            window.scrollTo(0, document.body.scrollHeight);
+        }
 
+        input.addEventListener('focus', () => { setTimeout(scrollToBottom, 300); });
+        input.addEventListener('input', function() { display.innerText = this.value; scrollToBottom(); });
         input.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 const cmd = this.value.trim();
-                if (cmd) {
-                    cmdHistory.push(cmd);
-                    historyIndex = cmdHistory.length;
-                    processCommand(cmd);
-                }
-                this.value = '';
-                display.innerText = '';
-            } else if (e.key === 'ArrowUp') {
-                if (historyIndex > 0) {
-                    historyIndex--;
-                    this.value = cmdHistory[historyIndex];
-                    display.innerText = this.value;
-                }
-                e.preventDefault();
-            } else if (e.key === 'ArrowDown') {
-                if (historyIndex < cmdHistory.length - 1) {
-                    historyIndex++;
-                    this.value = cmdHistory[historyIndex];
-                    display.innerText = this.value;
-                } else {
-                    historyIndex = cmdHistory.length;
-                    this.value = '';
-                    display.innerText = '';
-                }
-                e.preventDefault();
+                if (cmd) { processCommand(cmd); }
+                this.value = ''; display.innerText = '';
             }
         });
 
-        // Command Processing
         async function processCommand(cmd) {
             const parts = cmd.split(' ');
             const lowerCmd = parts[0].toLowerCase();
 
-            // Echo Input
             const cmdLine = document.createElement('div');
             cmdLine.className = 'output-line';
-            cmdLine.innerHTML = `<span class="prompt">gatere@portfolio:~$</span> ${cmd}`;
+            cmdLine.innerHTML = `<span class="prompt">christo@kerala:~$</span> ${cmd}`;
             historyDiv.appendChild(cmdLine);
 
             const output = document.createElement('div');
             output.className = 'output-line';
             historyDiv.appendChild(output);
 
-            // 1. Standard Commands
-            if (lowerCmd === 'clear') {
-                historyDiv.innerHTML = '';
-            } 
-            else if (files[lowerCmd]) {
-                output.innerHTML = files[lowerCmd];
-            } 
-            // 2. Login Logic
+            if (lowerCmd === 'clear') { historyDiv.innerHTML = ''; } 
+            else if (files[lowerCmd]) { output.innerHTML = files[lowerCmd]; } 
             else if (lowerCmd === 'login') {
                 if (parts.length > 1) {
                     setApiKey(parts[1]);
                     output.className += ' cmd-success';
-                    output.innerText = "Google Gemini Key saved! AI Mode enabled.";
+                    output.innerText = "Key saved! AI Enabled.";
                 } else {
                     output.className += ' cmd-error';
-                    output.innerText = "Usage: login <your-google-api-key>";
+                    output.innerText = "Usage: login <key>";
                 }
             }
-            else if (lowerCmd === 'logout') {
-                removeApiKey();
-                output.innerText = "Key removed. AI Mode disabled.";
-            }
-            // 3. AI Fallback
+            else if (lowerCmd === 'logout') { removeApiKey(); output.innerText = "Key removed."; }
             else {
                 const apiKey = getApiKey();
                 if (apiKey) {
@@ -324,51 +295,40 @@
                         typeWriter(aiResponse, output, 5);
                     } catch (error) {
                         output.className += ' cmd-error';
-                        output.innerText = "AI Error: " + error.message;
+                        output.innerText = "Error: " + error.message;
                     }
                 } else {
                     output.className += ' cmd-error';
-                    output.innerText = `Command not found: ${lowerCmd}. Type 'help' or 'login <key>'.`;
+                    output.innerText = `Unknown: ${lowerCmd}. Try 'help'.`;
                 }
             }
-            container.scrollTop = container.scrollHeight;
+            scrollToBottom();
         }
 
-        // Wrapper to run commands from nav clicks
         function runCmd(cmd) {
-            input.value = cmd;
-            display.innerText = cmd;
-            setTimeout(() => {
-                processCommand(cmd);
-                input.value = '';
-                display.innerText = '';
-                input.focus();
-            }, 100);
+            input.value = cmd; display.innerText = cmd; input.focus();
+            setTimeout(() => { processCommand(cmd); input.value = ''; display.innerText = ''; }, 100);
         }
 
-        // --- GOOGLE GEMINI API FUNCTION ---
         async function fetchGeminiResponse(userPrompt, apiKey) {
-            const systemContext = `You are Mark Gatere's interactive terminal portfolio assistant. 
-            You are helpful, concise, and tech-savvy. 
-            Answer questions about Mark based on these facts: 
-            - Software Engineer, AI enthusiast.
-            - Stacks: React, Node, Flutter, Python.
-            - Works at TechCorp.
-            - Loves Matrix movies and terminal interfaces.
-            If the user asks a general question, answer it normally. Keep answers short like a terminal output.`;
+            const systemContext = `You are the AI assistant for Christo's portfolio.
+            Christo is a Flutter Developer and Designer from Kerala, India.
+            
+            Key Facts about Christo:
+            - Loves Malayalam movies (OTT releases) & Anime (High School DxD).
+            - Fans of F1 Racing and Genshin Impact.
+            - Builds Music Apps in Flutter.
+            - Does custom Logo Design.
+            
+            Keep answers short (max 2 sentences). Be cool and tech-savvy.`;
 
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+            const modelName = "gemini-2.5-flash"; 
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
 
             const response = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{
-                        parts: [{
-                            text: systemContext + "\n\nUser Question: " + userPrompt
-                        }]
-                    }]
-                })
+                body: JSON.stringify({ contents: [{ parts: [{ text: systemContext + "\n\nUser: " + userPrompt }] }] })
             });
 
             const data = await response.json();
